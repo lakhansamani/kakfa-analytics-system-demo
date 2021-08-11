@@ -43,33 +43,18 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Context struct {
-		IP        func(childComplexity int) int
-		Locale    func(childComplexity int) int
-		Page      func(childComplexity int) int
-		UserAgent func(childComplexity int) int
-	}
-
 	Event struct {
-		Context    func(childComplexity int) int
-		CreatedAt  func(childComplexity int) int
-		EventClass func(childComplexity int) int
-		EventType  func(childComplexity int) int
-		ID         func(childComplexity int) int
-		UpdatedAt  func(childComplexity int) int
-		UserID     func(childComplexity int) int
+		EventType func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Path      func(childComplexity int) int
+		Search    func(childComplexity int) int
+		Title     func(childComplexity int) int
+		URL       func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	Mutation struct {
 		RegisterKafkaEvent func(childComplexity int, event model.RegisterKafkaEventInput) int
-	}
-
-	Page struct {
-		Path     func(childComplexity int) int
-		Referrer func(childComplexity int) int
-		Search   func(childComplexity int) int
-		Title    func(childComplexity int) int
-		URL      func(childComplexity int) int
 	}
 
 	PingResponse struct {
@@ -103,55 +88,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Context.ip":
-		if e.complexity.Context.IP == nil {
-			break
-		}
-
-		return e.complexity.Context.IP(childComplexity), true
-
-	case "Context.locale":
-		if e.complexity.Context.Locale == nil {
-			break
-		}
-
-		return e.complexity.Context.Locale(childComplexity), true
-
-	case "Context.page":
-		if e.complexity.Context.Page == nil {
-			break
-		}
-
-		return e.complexity.Context.Page(childComplexity), true
-
-	case "Context.userAgent":
-		if e.complexity.Context.UserAgent == nil {
-			break
-		}
-
-		return e.complexity.Context.UserAgent(childComplexity), true
-
-	case "Event.context":
-		if e.complexity.Event.Context == nil {
-			break
-		}
-
-		return e.complexity.Event.Context(childComplexity), true
-
-	case "Event.createdAt":
-		if e.complexity.Event.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Event.CreatedAt(childComplexity), true
-
-	case "Event.eventClass":
-		if e.complexity.Event.EventClass == nil {
-			break
-		}
-
-		return e.complexity.Event.EventClass(childComplexity), true
-
 	case "Event.eventType":
 		if e.complexity.Event.EventType == nil {
 			break
@@ -166,12 +102,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.ID(childComplexity), true
 
-	case "Event.updatedAt":
-		if e.complexity.Event.UpdatedAt == nil {
+	case "Event.path":
+		if e.complexity.Event.Path == nil {
 			break
 		}
 
-		return e.complexity.Event.UpdatedAt(childComplexity), true
+		return e.complexity.Event.Path(childComplexity), true
+
+	case "Event.search":
+		if e.complexity.Event.Search == nil {
+			break
+		}
+
+		return e.complexity.Event.Search(childComplexity), true
+
+	case "Event.title":
+		if e.complexity.Event.Title == nil {
+			break
+		}
+
+		return e.complexity.Event.Title(childComplexity), true
+
+	case "Event.url":
+		if e.complexity.Event.URL == nil {
+			break
+		}
+
+		return e.complexity.Event.URL(childComplexity), true
 
 	case "Event.userId":
 		if e.complexity.Event.UserID == nil {
@@ -191,41 +148,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RegisterKafkaEvent(childComplexity, args["event"].(model.RegisterKafkaEventInput)), true
-
-	case "Page.path":
-		if e.complexity.Page.Path == nil {
-			break
-		}
-
-		return e.complexity.Page.Path(childComplexity), true
-
-	case "Page.referrer":
-		if e.complexity.Page.Referrer == nil {
-			break
-		}
-
-		return e.complexity.Page.Referrer(childComplexity), true
-
-	case "Page.search":
-		if e.complexity.Page.Search == nil {
-			break
-		}
-
-		return e.complexity.Page.Search(childComplexity), true
-
-	case "Page.title":
-		if e.complexity.Page.Title == nil {
-			break
-		}
-
-		return e.complexity.Page.Title(childComplexity), true
-
-	case "Page.url":
-		if e.complexity.Page.URL == nil {
-			break
-		}
-
-		return e.complexity.Page.URL(childComplexity), true
 
 	case "PingResponse.message":
 		if e.complexity.PingResponse.Message == nil {
@@ -307,32 +229,13 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "graph/schema.graphqls", Input: `scalar Int64
 
-enum EventType {
-	PAGE_VIEW
-}
-
-type Page {
+type Event {
+	id: ID!
+	eventType: String
 	path: String
-	referrer: String
 	search: String
 	title: String
 	url: String
-}
-
-type Context {
-	ip: String
-	locale: String
-	userAgent: String
-	page: Page
-}
-
-type Event {
-	id: ID!
-	eventType: EventType
-	eventClass: String
-	context: Context
-	createdAt: Int64
-	updatedAt: Int64
 	userId: String
 }
 
@@ -341,15 +244,12 @@ type PingResponse {
 }
 
 input RegisterKafkaEventInput {
-	eventClass: String!
-	eventType: EventType!
+	eventType: String!
 	userId: String!
-	messageId: String
 	path: String!
+	search: String!
+	title: String!
 	url: String!
-	locale: String!
-	pageTitle: String!
-	pageSearchParam: String
 }
 
 type Mutation {
@@ -435,134 +335,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Context_ip(ctx context.Context, field graphql.CollectedField, obj *model.Context) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Context",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.IP, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Context_locale(ctx context.Context, field graphql.CollectedField, obj *model.Context) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Context",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Locale, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Context_userAgent(ctx context.Context, field graphql.CollectedField, obj *model.Context) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Context",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UserAgent, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Context_page(ctx context.Context, field graphql.CollectedField, obj *model.Context) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Context",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Page, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Page)
-	fc.Result = res
-	return ec.marshalOPage2ᚖproducerᚋgraphᚋmodelᚐPage(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Event_id(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -625,12 +397,12 @@ func (ec *executionContext) _Event_eventType(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.EventType)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOEventType2ᚖproducerᚋgraphᚋmodelᚐEventType(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Event_eventClass(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_path(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -648,7 +420,7 @@ func (ec *executionContext) _Event_eventClass(ctx context.Context, field graphql
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.EventClass, nil
+		return obj.Path, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -662,7 +434,7 @@ func (ec *executionContext) _Event_eventClass(ctx context.Context, field graphql
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Event_context(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_search(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -680,39 +452,7 @@ func (ec *executionContext) _Event_context(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Context, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Context)
-	fc.Result = res
-	return ec.marshalOContext2ᚖproducerᚋgraphᚋmodelᚐContext(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Event_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Event",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
+		return obj.Search, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -723,10 +463,10 @@ func (ec *executionContext) _Event_createdAt(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt642ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Event_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
+func (ec *executionContext) _Event_title(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -744,7 +484,7 @@ func (ec *executionContext) _Event_updatedAt(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.UpdatedAt, nil
+		return obj.Title, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -755,7 +495,39 @@ func (ec *executionContext) _Event_updatedAt(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt642ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Event_url(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_userId(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
@@ -830,166 +602,6 @@ func (ec *executionContext) _Mutation_register_kafka_event(ctx context.Context, 
 	res := resTmp.(*model.Event)
 	fc.Result = res
 	return ec.marshalNEvent2ᚖproducerᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Page_path(ctx context.Context, field graphql.CollectedField, obj *model.Page) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Page",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Path, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Page_referrer(ctx context.Context, field graphql.CollectedField, obj *model.Page) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Page",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Referrer, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Page_search(ctx context.Context, field graphql.CollectedField, obj *model.Page) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Page",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Search, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Page_title(ctx context.Context, field graphql.CollectedField, obj *model.Page) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Page",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Title, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Page_url(ctx context.Context, field graphql.CollectedField, obj *model.Page) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Page",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.URL, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PingResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.PingResponse) (ret graphql.Marshaler) {
@@ -2226,19 +1838,11 @@ func (ec *executionContext) unmarshalInputRegisterKafkaEventInput(ctx context.Co
 
 	for k, v := range asMap {
 		switch k {
-		case "eventClass":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventClass"))
-			it.EventClass, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "eventType":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventType"))
-			it.EventType, err = ec.unmarshalNEventType2producerᚋgraphᚋmodelᚐEventType(ctx, v)
+			it.EventType, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2250,14 +1854,6 @@ func (ec *executionContext) unmarshalInputRegisterKafkaEventInput(ctx context.Co
 			if err != nil {
 				return it, err
 			}
-		case "messageId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("messageId"))
-			it.MessageID, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "path":
 			var err error
 
@@ -2266,35 +1862,27 @@ func (ec *executionContext) unmarshalInputRegisterKafkaEventInput(ctx context.Co
 			if err != nil {
 				return it, err
 			}
+		case "search":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+			it.Search, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "url":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
 			it.URL, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "locale":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locale"))
-			it.Locale, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "pageTitle":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pageTitle"))
-			it.PageTitle, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "pageSearchParam":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pageSearchParam"))
-			it.PageSearchParam, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2311,36 +1899,6 @@ func (ec *executionContext) unmarshalInputRegisterKafkaEventInput(ctx context.Co
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
-
-var contextImplementors = []string{"Context"}
-
-func (ec *executionContext) _Context(ctx context.Context, sel ast.SelectionSet, obj *model.Context) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, contextImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Context")
-		case "ip":
-			out.Values[i] = ec._Context_ip(ctx, field, obj)
-		case "locale":
-			out.Values[i] = ec._Context_locale(ctx, field, obj)
-		case "userAgent":
-			out.Values[i] = ec._Context_userAgent(ctx, field, obj)
-		case "page":
-			out.Values[i] = ec._Context_page(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
 
 var eventImplementors = []string{"Event"}
 
@@ -2360,14 +1918,14 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "eventType":
 			out.Values[i] = ec._Event_eventType(ctx, field, obj)
-		case "eventClass":
-			out.Values[i] = ec._Event_eventClass(ctx, field, obj)
-		case "context":
-			out.Values[i] = ec._Event_context(ctx, field, obj)
-		case "createdAt":
-			out.Values[i] = ec._Event_createdAt(ctx, field, obj)
-		case "updatedAt":
-			out.Values[i] = ec._Event_updatedAt(ctx, field, obj)
+		case "path":
+			out.Values[i] = ec._Event_path(ctx, field, obj)
+		case "search":
+			out.Values[i] = ec._Event_search(ctx, field, obj)
+		case "title":
+			out.Values[i] = ec._Event_title(ctx, field, obj)
+		case "url":
+			out.Values[i] = ec._Event_url(ctx, field, obj)
 		case "userId":
 			out.Values[i] = ec._Event_userId(ctx, field, obj)
 		default:
@@ -2401,38 +1959,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var pageImplementors = []string{"Page"}
-
-func (ec *executionContext) _Page(ctx context.Context, sel ast.SelectionSet, obj *model.Page) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, pageImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Page")
-		case "path":
-			out.Values[i] = ec._Page_path(ctx, field, obj)
-		case "referrer":
-			out.Values[i] = ec._Page_referrer(ctx, field, obj)
-		case "search":
-			out.Values[i] = ec._Page_search(ctx, field, obj)
-		case "title":
-			out.Values[i] = ec._Page_title(ctx, field, obj)
-		case "url":
-			out.Values[i] = ec._Page_url(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2789,16 +2315,6 @@ func (ec *executionContext) marshalNEvent2ᚖproducerᚋgraphᚋmodelᚐEvent(ct
 	return ec._Event(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEventType2producerᚋgraphᚋmodelᚐEventType(ctx context.Context, v interface{}) (model.EventType, error) {
-	var res model.EventType
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNEventType2producerᚋgraphᚋmodelᚐEventType(ctx context.Context, sel ast.SelectionSet, v model.EventType) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3099,51 +2615,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
-}
-
-func (ec *executionContext) marshalOContext2ᚖproducerᚋgraphᚋmodelᚐContext(ctx context.Context, sel ast.SelectionSet, v *model.Context) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Context(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOEventType2ᚖproducerᚋgraphᚋmodelᚐEventType(ctx context.Context, v interface{}) (*model.EventType, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(model.EventType)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOEventType2ᚖproducerᚋgraphᚋmodelᚐEventType(ctx context.Context, sel ast.SelectionSet, v *model.EventType) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
-}
-
-func (ec *executionContext) unmarshalOInt642ᚖstring(ctx context.Context, v interface{}) (*string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalString(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt642ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*v)
-}
-
-func (ec *executionContext) marshalOPage2ᚖproducerᚋgraphᚋmodelᚐPage(ctx context.Context, sel ast.SelectionSet, v *model.Page) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Page(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

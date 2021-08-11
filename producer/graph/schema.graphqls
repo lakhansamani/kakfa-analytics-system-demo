@@ -1,31 +1,12 @@
 scalar Int64
 
-enum EventType {
-	PAGE_VIEW
-}
-
-type Page {
+type Event {
+	id: ID!
+	eventType: String
 	path: String
-	referrer: String
 	search: String
 	title: String
 	url: String
-}
-
-type Context {
-	ip: String
-	locale: String
-	userAgent: String
-	page: Page
-}
-
-type Event {
-	id: ID!
-	eventType: EventType
-	eventClass: String
-	context: Context
-	createdAt: Int64
-	updatedAt: Int64
 	userId: String
 }
 
@@ -34,15 +15,12 @@ type PingResponse {
 }
 
 input RegisterKafkaEventInput {
-	eventClass: String!
-	eventType: EventType!
+	eventType: String!
 	userId: String!
-	messageId: String
 	path: String!
+	search: String!
+	title: String!
 	url: String!
-	locale: String!
-	pageTitle: String!
-	pageSearchParam: String
 }
 
 type Mutation {
